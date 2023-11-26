@@ -1,0 +1,95 @@
+---
+interface Props {
+	channel?: string;
+	username?: string;
+}
+
+const { channel, username } = Astro.props;
+---
+
+<div class="chat-window">
+    <div class="chat-info">
+        <div class="chat-session">
+            <span>Channel: {channel ?? 'Unknown'}</span>
+            <span>User: {username ?? 'Login'}</span>
+        </div>
+        <div class="chat-controls">Controls</div>
+    </div>
+    <div class="chat-messages"></div>
+    <div class="chat-input">
+        <textarea placeholder="Message..."></textarea>
+        <button>Send</button>
+    </div>
+</div>
+<style>
+    .chat-window {
+        height: 100%;
+        width: 100%;
+        min-height: 100vh;
+        min-width: 250px;
+        display: flex;
+        flex-direction: column;
+        flex: 0 1;
+        padding: 5px;
+        background: #111;
+    }
+
+    .chat-window:only-child {
+        flex: 1;
+    }
+
+    .chat-info {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        border-radius: 5px 5px 0px 0px;
+        background-color: #333;
+    }
+
+    .chat-session {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px;
+    }
+
+    .chat-controls {
+        padding: 5px;
+    }
+
+    .chat-messages {
+        flex: 1 0;
+        background-color: #222;
+    }
+
+    .chat-input {
+        display: flex;
+        background-color: #333;
+        height: 45px;
+        overflow: hidden;
+        border-radius: 0px 0px 5px 5px;
+    }
+
+    .chat-input textarea {
+        resize: none;
+        height: 100%;
+        border: 0px;
+        outline: none;
+        padding: 14px 8px;
+        flex: 1;
+        background: transparent;
+        color: #fff;
+        min-width: 100px;
+        font-size: 15px;
+    }
+
+    .chat-input button {
+        width: fit-content;
+        height: 100%;
+        border: 0px;
+        border-left: 1px solid #2a2a2a;
+        outline: none;
+        padding: 5px 10px;
+        background: transparent;
+        color: #fff;
+    }
+</style>
