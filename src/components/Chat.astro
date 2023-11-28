@@ -4,6 +4,8 @@ interface Props {
 	username?: string;
 }
 
+const name = (Math.floor(Math.random() * 64^4)).toString(16);
+
 const { channel, username } = Astro.props;
 ---
 
@@ -11,16 +13,65 @@ const { channel, username } = Astro.props;
     <div class="chat-info">
         <div class="chat-session">
             <span>Channel: {channel ?? 'Unknown'}</span>
-            <span>User: {username ?? 'Login'}</span>
+            <span>User: {username ?? name ?? 'Login'}</span>
         </div>
         <div class="chat-controls">Controls</div>
     </div>
-    <div class="chat-messages"></div>
+    <div id="chat-message-list" class="chat-messages"></div>
     <div class="chat-input">
-        <textarea placeholder="Message..."></textarea>
-        <button>Send</button>
+        <textarea id="chat-input-elem" placeholder="Message..."></textarea>
+        <button id="chat-input-button">Send</button>
     </div>
 </div>
+<script is:inline define:vars={{ name }}>
+    window.name = name;
+</script>
+<script>
+    let websocket = new WebSocket('ws://localhost:8000');
+    websocket.onopen = () => {
+        console.log("Opened Websocket!");
+    }
+    websocket.onmessage = (e) => {
+        document.getElementById('chat-message-list')?.appendChild(generateMessageElem(JSON.parse(e.data)));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        let input = document.getElementById('chat-input-elem') as HTMLTextAreaElement;
+
+        const onInput = (e: any) => {
+            if((e.code === 'Enter' || e.code === 'NumpadEnter') && e.shiftKey === false) {
+                e.preventDefault();
+                e.stopPropagation();
+                onSubmit(e);
+            }
+        }
+
+        const onSubmit = (e: any) => {
+            if(input.value === "") { return; }
+            sendMessage(input.value);
+            input.value = "";
+        }
+
+        input?.addEventListener('keydown', onInput);
+        document.getElementById('chat-input-button')?.addEventListener('click', onSubmit);
+    });
+
+    function generateMessageElem(msg: any) {
+        console.log("Gen msg:", msg);
+        let elem = document.createElement('div');
+        let elem2 = document.createElement('span');
+        elem2.textContent = msg.name;
+        elem.appendChild(elem2);
+        elem2 = document.createElement('p');
+        elem2.textContent = `: ${msg.text}`;
+        elem.appendChild(elem2);
+        return elem;
+    }
+
+    function sendMessage(value: any) {
+        websocket.send(JSON.stringify({name: window.name, text: value}));
+    }
+</script>
 <style>
     .chat-window {
         height: 100%;
