@@ -1,12 +1,14 @@
 ---
 interface Props {
 	channel?: string;
+    ws_url_overwrite?: string;
 	username?: string;
 }
 
-const name = (Math.floor(Math.random() * 64^4)).toString(16);
+const getNum = () => { return Math.floor(Math.random() * 16).toString(16) }
+const name = Array(8).map(() => getNum()).join('');
 
-const { channel, username } = Astro.props;
+const { channel, ws_url_overwrite, username } = Astro.props;
 ---
 
 <div class="chat-window">
@@ -23,18 +25,12 @@ const { channel, username } = Astro.props;
         <button id="chat-input-button">Send</button>
     </div>
 </div>
-<script is:inline define:vars={{ name }}>
+<script define:vars={{ name, channel, ws_url_overwrite }}>
     window.name = name;
+    window.channel = channel;
+    window.ws_url_overwrite = ws_url_overwrite;
 </script>
 <script>
-    let websocket = new WebSocket('ws://localhost:8000');
-    websocket.onopen = () => {
-        console.log("Opened Websocket!");
-    }
-    websocket.onmessage = (e) => {
-        document.getElementById('chat-message-list')?.appendChild(generateMessageElem(JSON.parse(e.data)));
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
         let input = document.getElementById('chat-input-elem') as HTMLTextAreaElement;
 
@@ -54,7 +50,16 @@ const { channel, username } = Astro.props;
 
         input?.addEventListener('keydown', onInput);
         document.getElementById('chat-input-button')?.addEventListener('click', onSubmit);
+
+        connnectToURl((window as any)?.ws_url_overwrite ?? `ws://localhost:8000/${(window as any)?.channel ?? window.location.host.split('.')[0]}`);
     });
+
+    var websocket: WebSocket | null = null;
+    function connnectToURl(url: string) {
+        websocket = new WebSocket(url);
+        websocket.onopen = () => { console.log(`Connecting to ${url}...`) }
+        websocket.onmessage = (e) => { document.getElementById('chat-message-list')?.appendChild(generateMessageElem(JSON.parse(e.data))); }
+    }
 
     function generateMessageElem(msg: any) {
         console.log("Gen msg:", msg);
@@ -69,7 +74,7 @@ const { channel, username } = Astro.props;
     }
 
     function sendMessage(value: any) {
-        websocket.send(JSON.stringify({name: window.name, text: value}));
+        websocket?.send(JSON.stringify({name: window.name, text: value}));
     }
 </script>
 <style>
