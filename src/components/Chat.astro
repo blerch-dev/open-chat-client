@@ -1,21 +1,18 @@
 ---
 interface Props {
-	channel?: string;
     ws_url_overwrite?: string;
+	channel?: string;
 	username?: string;
 }
 
-const getNum = () => { return Math.floor(Math.random() * 16).toString(16) }
-const name = Array(8).map(() => getNum()).join('');
-
-const { channel, ws_url_overwrite, username } = Astro.props;
+const { ws_url_overwrite, channel, username } = Astro.props;
 ---
 
 <div class="chat-window">
     <div class="chat-info">
         <div class="chat-session">
-            <span>Channel: {channel ?? 'Unknown'}</span>
-            <span>User: {username ?? name ?? 'Login'}</span>
+            <span id="channel-name">{channel ?? 'Channel'}</span>
+            <span id="user-name">{username || <a href="/login">Login</a>}</span>
         </div>
         <div class="chat-controls">Controls</div>
     </div>
@@ -25,12 +22,16 @@ const { channel, ws_url_overwrite, username } = Astro.props;
         <button id="chat-input-button">Send</button>
     </div>
 </div>
-<script define:vars={{ name, channel, ws_url_overwrite }}>
-    window.name = name;
+<script define:vars={{ channel, ws_url_overwrite }}>
     window.channel = channel;
     window.ws_url_overwrite = ws_url_overwrite;
 </script>
 <script>
+    import { FetchSession } from '../scripts/api';
+    FetchSession("Chat").then((output: any) => {
+        console.log("Session:", output);
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
         let input = document.getElementById('chat-input-elem') as HTMLTextAreaElement;
 
