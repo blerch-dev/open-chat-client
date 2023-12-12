@@ -50,7 +50,7 @@ const { ws_url_overwrite, channel, username } = Astro.props;
         input?.addEventListener('keydown', onInput);
         document.getElementById('chat-input-button')?.addEventListener('click', onSubmit);
 
-        const ws_host = import.meta.env.PUBLIC_API_URL ?? 'localhost:8001';
+        const ws_host = import.meta.env.PUBLIC_API_URL ?? 'chat.app.tv';
         connnectToURl((window as any)?.ws_url_overwrite ?? `ws://chat.${ws_host}/${(window as any)?.channel ?? window.location.host.split('.')[0]}`);
     });
 
